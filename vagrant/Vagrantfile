@@ -1,0 +1,32 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+
+  # Use the latest Debian 12 (Bookworm) base box
+  config.vm.box = "debian/bookworm64"
+  # debian/trixie64
+
+  # Network: assign a static private IP so you can open it in your browser
+  config.vm.network "private_network", ip: "192.168.56.20"
+
+   # Sync the pixelfed project root to /var/www/html, excluding the vagrant folder
+    config.vm.synced_folder "../", "/var/www/html/pixelfed",
+      type: "rsync",
+      rsync__exclude: ["vagrant/", ".vagrant/"]
+
+   # Sync only the .env file from the vagrant folder
+    config.vm.synced_folder "vagrant_sync/", "/var/www/html/pixelfed/env",
+        type: "rsync"
+
+  # VirtualBox settings
+  config.vm.provider "virtualbox" do |vb|
+    vb.name   = "debian-php85"
+    vb.memory = "1024"
+    vb.cpus   = 1
+  end
+
+  # Run the provisioning shell script on first `vagrant up`
+  config.vm.provision "shell", path: "provision.sh"
+
+end
