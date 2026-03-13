@@ -14,16 +14,20 @@ vagrant halt      # Stop the box
 vagrant destroy   # Delete the box
 ```
 
+## add url to /etc/hosts
+Add `192.168.56.20 local.pixelfed.test` to your host machine's `/etc/hosts` file.)
+(don't use .dev, it's not working as it's preserved.)
+
+
 ## PHP Test
 After `vagrant up`, open your browser at:
 https://local.pixelfed.test
 
-(Add `192.168.56.20 local.pixelfed.test` to your host machine's `/etc/hosts` file.)
-(don't use .dev, it's not working as it's preserved.)
 
 ## SSL / Let's Encrypt
 
 SSL is configured via variables at the top of `provision.sh`:
+Not tested yet with let's encrypt
 
 | Variable            | Description                                                        |
 |---------------------|--------------------------------------------------------------------|
@@ -35,7 +39,8 @@ SSL is configured via variables at the top of `provision.sh`:
 Works out of the box. Your browser will show a certificate warning (`MOZILLA_PKIX_ERROR_SELF_SIGNED_CERT` in Firefox).
 Click **Advanced…** → **Accept the Risk and Continue** to proceed.
 
-### Let's Encrypt (production / publicly reachable domain)
+
+### Let's Encrypt (production / publicly reachable domain - not tested yet)
 1. Set `ssl_mode="letsencrypt"` in `provision.sh`
 2. Set `app_domain` to your publicly reachable domain
 3. Set `letsencrypt_email` to a valid email address
