@@ -252,6 +252,9 @@ cat >> /home/vagrant/.bashrc <<'EOF'
 alias l='ls -alh'
 alias e='exit'
 alias pf='cd /var/www/html/pixelfed'
+alias logs='sudo tail -f /var/log/apache2/*.log'
+alias logs-app='tail -f /var/www/html/pixelfed/storage/logs/laravel.log'
+alias logs-ssl='sudo tail -f /var/log/apache2/pixelfed-ssl-error.log'
 EOF
 
 cp /var/www/html/pixelfed/env/.env /var/www/html/pixelfed/.env

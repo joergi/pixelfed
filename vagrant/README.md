@@ -59,3 +59,11 @@ or: `vagrant provision`
 vagrant rsync-auto
 ```
 to auto sync whatever files you are changing
+
+## create a user:
+```bash
+# login via ssh 
+vagrant ssh
+# crate user
+php artisan user:create
+```
