@@ -17,7 +17,7 @@ app_pass="strong_password"
 # Set to "letsencrypt" for a real certificate (domain must be publicly reachable)
 # Set to "selfsigned" for a local self-signed certificate (works offline / Vagrant)
 ssl_mode="selfsigned"
-app_domain="local.pixelfed.dev"
+app_domain="local.pixelfed.test"
 letsencrypt_email=""   # required when ssl_mode=letsencrypt (e.g. "admin@pixelfed.dev")
 
 
@@ -107,7 +107,7 @@ a2enmod ssl rewrite headers
 echo "--- Deploying Pixelfed Apache VirtualHost ---"
 cp /var/www/html/pixelfed/env/pixelfed-apache.conf /etc/apache2/sites-available/pixelfed.conf
 # Replace placeholder domain with configured domain
-sed -i "s/local.pixelfed.dev/$app_domain/g" /etc/apache2/sites-available/pixelfed.conf
+sed -i "s/local.pixelfed.test/$app_domain/g" /etc/apache2/sites-available/pixelfed.conf
 a2ensite pixelfed.conf
 a2dissite 000-default.conf
 
