@@ -248,6 +248,13 @@ unixsocket /run/redis/redis.sock
 unixsocketperm 770
 EOF
 
+echo "--- Enabling and restarting Redis ---"
+systemctl enable redis-server
+systemctl restart redis-server
+
+# Add vagrant user to redis group so it can access the unix socket
+usermod -aG redis vagrant
+
 cat >> /home/vagrant/.bashrc <<'EOF'
 alias l='ls -alh'
 alias e='exit'
@@ -255,11 +262,18 @@ alias pf='cd /var/www/html/pixelfed'
 alias logs='sudo tail -f /var/log/apache2/*.log'
 alias logs-app='tail -f /var/www/html/pixelfed/storage/logs/laravel.log'
 alias logs-ssl='sudo tail -f /var/log/apache2/pixelfed-ssl-error.log'
+alias redis-check='redis-cli ping && echo "Redis is running!" || echo "Redis is NOT running!"'
 EOF
 
 cp /var/www/html/pixelfed/env/.env /var/www/html/pixelfed/.env
 cp /var/www/html/pixelfed/env/pixelfed.service /etc/systemd/system/pixelfed.service
 chown vagrant:vagrant /var/www/html/pixelfed/.env
+
+# Use the native phpredis C extension (faster than the pure-PHP Predis library).
+# The php8.5-redis package is already installed above.
+if ! grep -q '^REDIS_CLIENT=' /var/www/html/pixelfed/.env; then
+    sed -i '/^REDIS_PORT=/a REDIS_CLIENT=phpredis' /var/www/html/pixelfed/.env
+fi
 
 cd /var/www/html/pixelfed
 sudo find . -type d -exec chmod 755 {} \;
@@ -272,6 +286,9 @@ composer install --no-ansi --no-interaction --optimize-autoloader
 # set all files to user/group vagrant
 sudo find . -type d -exec chown vagrant:vagrant {} \;
 sudo find . -type f -exec chown vagrant:vagrant {} \;
+
+# set logs to non root
+sudo chown vagrant:vagrant /var/log/apache2
 
 if [ -f "$MARKER" ]; then
     echo "--- Already provisioned, skipping: everything from docs: https://docs.pixelfed.org/running-pixelfed/installation.html"

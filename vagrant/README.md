@@ -60,10 +60,30 @@ vagrant rsync-auto
 ```
 to auto sync whatever files you are changing
 
-## create a user:
+## Check if Redis is working
 ```bash
-# login via ssh 
 vagrant ssh
-# crate user
+redis-check          # alias: pings Redis and prints status
+redis-cli ping       # expect: PONG
+redis-cli info server  # full server info
+```
+
+## After the start, create a user
+```bash
+vagrant ssh
+pf                       # shortcut for cd /var/www/html/pixelfed
 php artisan user:create
 ```
+
+## Useful shell aliases
+These aliases are available after `vagrant ssh`:
+
+| Alias        | Command                                                     |
+|--------------|-------------------------------------------------------------|
+| `pf`         | `cd /var/www/html/pixelfed`                                 |
+| `l`          | `ls -alh`                                                   |
+| `e`          | `exit`                                                      |
+| `logs`       | `sudo tail -f /var/log/apache2/*.log`                       |
+| `logs-app`   | `tail -f /var/www/html/pixelfed/storage/logs/laravel.log`   |
+| `logs-ssl`   | `sudo tail -f /var/log/apache2/pixelfed-ssl-error.log`      |
+| `redis-check`| `redis-cli ping` + status message                           |
