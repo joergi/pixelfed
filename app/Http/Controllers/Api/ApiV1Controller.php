@@ -86,7 +86,7 @@ use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
-use Laravel\Passport\Passport;
+use Laravel\Passport\Client;
 use League\Fractal;
 use League\Fractal\Serializer\ArraySerializer;
 use Storage;
@@ -145,16 +145,18 @@ class ApiV1Controller extends Controller
             ->filter()
             ->join(',');
 
-        $client = Passport::client()->forceFill([
+        $secret = Str::random(40);
+
+        $client = new Client;
+        $client->forceFill([
             'user_id' => null,
             'name' => e($request->client_name),
-            'secret' => Str::random(40),
+            'secret' => $secret,
             'redirect' => $uris,
             'personal_access_client' => false,
             'password_client' => false,
             'revoked' => false,
         ]);
-
         $client->save();
 
         $res = [
@@ -163,7 +165,7 @@ class ApiV1Controller extends Controller
             'website' => null,
             'redirect_uri' => $client->redirect,
             'client_id' => (string) $client->id,
-            'client_secret' => $client->secret,
+            'client_secret' => $secret,
             'vapid_key' => null,
         ];
 
@@ -1972,9 +1974,11 @@ class ApiV1Controller extends Controller
             abort(403, 'Invalid or unsupported mime type.');
         }
 
+        $hash = \hash_file('sha256', $photo->getRealPath());
+        abort_if(MediaBlocklistService::exists($hash) == true, 451);
+
         $storagePath = MediaPathService::get($user, 2);
         $path = $photo->storePublicly($storagePath);
-        $hash = \hash_file('sha256', $photo);
         $license = null;
         $mime = $photo->getMimeType();
 
@@ -1997,8 +2001,6 @@ class ApiV1Controller extends Controller
                 $license = $compose['default_license'];
             }
         }
-
-        abort_if(MediaBlocklistService::exists($hash) == true, 451);
 
         $media = new Media;
         $media->status_id = null;
@@ -2199,9 +2201,11 @@ class ApiV1Controller extends Controller
             abort(403, 'Invalid or unsupported mime type.');
         }
 
+        $hash = \hash_file('sha256', $photo->getRealPath());
+        abort_if(MediaBlocklistService::exists($hash) == true, 451);
+
         $storagePath = MediaPathService::get($user, 2);
         $path = $photo->storePublicly($storagePath);
-        $hash = \hash_file('sha256', $photo);
         $license = null;
         $mime = $photo->getMimeType();
 
@@ -2214,8 +2218,6 @@ class ApiV1Controller extends Controller
                 $license = $compose['default_license'];
             }
         }
-
-        abort_if(MediaBlocklistService::exists($hash) == true, 451);
 
         if ($request->has('replace_id')) {
             $rpid = $request->input('replace_id');
